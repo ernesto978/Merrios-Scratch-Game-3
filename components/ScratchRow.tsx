@@ -14,82 +14,88 @@ export const ScratchRow: React.FC<ScratchRowProps> = ({ id, diceValues, onReveal
   const isDrawingRef = useRef(false);
   const hasInitializedRef = useRef(false);
 
-  // Initial Setup: Runs only once
+  // Função para inicializar o canvas com as dimensões corretas
+  const initCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+
+    const width = canvas.offsetWidth;
+    const height = canvas.offsetHeight;
+
+    if (width === 0 || height === 0) {
+      requestAnimationFrame(initCanvas);
+      return;
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+
+    // 1. Dégradé Or Royal Scintillant
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, '#fcd34d'); // Jaune Or
+    gradient.addColorStop(0.3, '#fbbf24'); // Ambre
+    gradient.addColorStop(0.5, '#fef3c7'); // Blanc-Or Éclatant
+    gradient.addColorStop(0.7, '#d97706'); // Or Sombre
+    gradient.addColorStop(1, '#fbbf24');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 2. Texture "Paillettes / Or Martelé"
+    for (let i = 0; i < 2000; i++) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const r = Math.random() * 1.2;
+      const opacity = Math.random() * 0.3;
+      const hue = Math.random() * 20 + 40; 
+      ctx.fillStyle = `hsla(${hue}, 100%, 70%, ${opacity})`;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3. Motif de sécurité
+    ctx.strokeStyle = 'rgba(180, 83, 9, 0.15)';
+    ctx.lineWidth = 0.5;
+    for (let i = -canvas.width; i < canvas.width; i += 12) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i + canvas.height, canvas.height);
+      ctx.stroke();
+    }
+
+    // 4. Texte Gravé "GRATTEZ ICI" - Fix weight to 900
+    ctx.font = '900 24px Montserrat, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Shadow/Depth effect
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillText('GRATTEZ ICI', canvas.width / 2 + 1, canvas.height / 2 + 1);
+    ctx.fillStyle = 'rgba(120, 53, 15, 0.5)';
+    ctx.fillText('GRATTEZ ICI', canvas.width / 2, canvas.height / 2);
+
+    hasInitializedRef.current = true;
+  };
+
   useEffect(() => {
-    const initCanvas = () => {
-      const canvas = canvasRef.current;
-      if (!canvas || hasInitializedRef.current) return;
-
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (!ctx) return;
-
-      const width = canvas.offsetWidth;
-      const height = canvas.offsetHeight;
-
-      if (width === 0 || height === 0) {
-        requestAnimationFrame(initCanvas);
-        return;
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      // 1. Create a metallic silver gradient
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, '#e2e8f0'); // Very light silver
-      gradient.addColorStop(0.2, '#94a3b8'); // Medium silver
-      gradient.addColorStop(0.5, '#cbd5e1'); // Light silver
-      gradient.addColorStop(0.8, '#64748b'); // Darker silver shadow
-      gradient.addColorStop(1, '#94a3b8');
-
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // 2. Add "brushed metal" texture
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i < 400; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        const len = Math.random() * 80 + 20;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + len, y + (Math.random() - 0.5) * 2);
-        ctx.stroke();
-      }
-
-      // 3. Add grain/noise
-      for (let i = 0; i < 5000; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        const shade = Math.floor(Math.random() * 50 + 100);
-        const opacity = Math.random() * 0.3;
-        ctx.fillStyle = `rgba(${shade}, ${shade}, ${shade}, ${opacity})`;
-        ctx.fillRect(x, y, 1, 1);
-      }
-
-      // 4. Subtle "engraved" look for the text
-      ctx.font = 'bold 24px Montserrat';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      
-      // Shadow/Inner bevel effect for text
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.fillText('GRATTEZ ICI', canvas.width / 2 + 1, canvas.height / 2 + 1);
-      
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-      ctx.fillText('GRATTEZ ICI', canvas.width / 2, canvas.height / 2);
-
-      hasInitializedRef.current = true;
-    };
-
     initCanvas();
+    
+    // Re-init if window is resized to fix canvas scaling
+    const handleResize = () => {
+      hasInitializedRef.current = false;
+      initCanvas();
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const checkReveal = () => {
     const canvas = canvasRef.current;
     if (!canvas || canvas.width === 0 || canvas.height === 0) return;
-    
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -101,12 +107,12 @@ export const ScratchRow: React.FC<ScratchRowProps> = ({ id, diceValues, onReveal
         if (pixels[i] < 128) transparentPixels++;
       }
       const percentage = (transparentPixels / (pixels.length / 4)) * 100;
-      if (percentage > 55 && !isRevealed) {
+      if (percentage > 50 && !isRevealed) {
         setIsRevealed(true);
         onRevealed();
       }
     } catch (e) {
-      console.warn("Could not check reveal status:", e);
+      console.warn("Reveal check failed", e);
     }
   };
 
@@ -114,24 +120,26 @@ export const ScratchRow: React.FC<ScratchRowProps> = ({ id, diceValues, onReveal
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    
     let clientX, clientY;
-    if ('touches' in e) {
-      const touch = (e as TouchEvent).touches[0];
-      clientX = touch.clientX;
-      clientY = touch.clientY;
-    } else {
+    
+    if ('touches' in e && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if ('clientX' in e) {
       clientX = (e as MouseEvent).clientX;
       clientY = (e as MouseEvent).clientY;
+    } else {
+      return { x: 0, y: 0 };
     }
-
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
+    
+    return { 
+      x: (clientX - rect.left) * (canvas.width / rect.width), 
+      y: (clientY - rect.top) * (canvas.height / rect.height) 
     };
   };
 
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    if (isRevealed) return;
     isDrawingRef.current = true;
     draw(e);
   };
@@ -145,42 +153,32 @@ export const ScratchRow: React.FC<ScratchRowProps> = ({ id, diceValues, onReveal
 
   const draw = (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
     if (!isDrawingRef.current || isRevealed) return;
-    
     const canvas = canvasRef.current;
-    if (!canvas || canvas.width === 0 || canvas.height === 0) return;
-    
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const { x, y } = getPointerPos(e);
-
+    
     ctx.globalCompositeOperation = 'destination-out';
-    
-    // Create a "rough" brush by drawing multiple jittered circles
-    // and using a slightly irregular shape
     ctx.beginPath();
-    
-    // Main scratch circle
     ctx.arc(x, y, 22, 0, Math.PI * 2);
-    
-    // Add "rough edges" particles
-    for (let i = 0; i < 8; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random() * 20 + 10;
-        const rx = x + Math.cos(angle) * dist;
-        const ry = y + Math.sin(angle) * dist;
-        const size = Math.random() * 8 + 4;
-        ctx.moveTo(rx + size, ry);
-        ctx.arc(rx, ry, size, 0, Math.PI * 2);
-    }
-    
     ctx.fill();
+    
+    // Add some random offsets for a more "scratchy" organic feel
+    for (let i = 0; i < 3; i++) {
+        const ox = (Math.random() - 0.5) * 10;
+        const oy = (Math.random() - 0.5) * 10;
+        ctx.beginPath();
+        ctx.arc(x + ox, y + oy, 15, 0, Math.PI * 2);
+        ctx.fill();
+    }
   };
 
   useEffect(() => {
     const handleGlobalUp = () => stopDrawing();
     window.addEventListener('mouseup', handleGlobalUp);
-    window.addEventListener('touchend', handleGlobalUp);
+    window.addEventListener('touchend', handleGlobalUp, { passive: false });
     return () => {
       window.removeEventListener('mouseup', handleGlobalUp);
       window.removeEventListener('touchend', handleGlobalUp);
@@ -188,10 +186,10 @@ export const ScratchRow: React.FC<ScratchRowProps> = ({ id, diceValues, onReveal
   }, [isRevealed]);
 
   return (
-    <div className="relative w-full h-24 md:h-32 bg-emerald-950/40 rounded-lg flex items-center justify-around px-4 md:px-8 border-2 border-amber-900/30 overflow-hidden shadow-inner">
-      <div className="flex gap-4 md:gap-12">
+    <div className="relative w-full h-24 md:h-32 bg-emerald-950 rounded-[1.2rem] flex items-center justify-around px-4 md:px-12 border-4 border-yellow-600/20 overflow-hidden shadow-2xl group transition-all duration-300 hover:shadow-emerald-500/20">
+      <div className="flex gap-4 md:gap-16">
         {diceValues.map((val, idx) => (
-          <Dice key={idx} value={val} className="transform scale-90 md:scale-100" />
+          <Dice key={idx} value={val} className="transform scale-90 md:scale-110 transition-all hover:rotate-6 drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]" />
         ))}
       </div>
       {!isRevealed && (
@@ -199,14 +197,20 @@ export const ScratchRow: React.FC<ScratchRowProps> = ({ id, diceValues, onReveal
           ref={canvasRef}
           onMouseDown={startDrawing}
           onMouseMove={draw}
-          onTouchStart={startDrawing}
-          onTouchMove={draw}
-          className="absolute inset-0 w-full h-full rounded-lg touch-none scratch-canvas transition-opacity duration-300"
+          onTouchStart={(e) => {
+            // Prevent scrolling while scratching
+            if (e.cancelable) e.preventDefault();
+            startDrawing(e);
+          }}
+          onTouchMove={(e) => {
+            if (e.cancelable) e.preventDefault();
+            draw(e);
+          }}
+          className="absolute inset-0 w-full h-full touch-none scratch-canvas transition-opacity duration-300"
         />
       )}
-      {/* Revealed Glow Effect */}
       {isRevealed && (
-        <div className="absolute inset-0 bg-white/5 pointer-events-none animate-pulse" />
+        <div className="absolute inset-0 bg-yellow-400/10 pointer-events-none animate-pulse" />
       )}
     </div>
   );

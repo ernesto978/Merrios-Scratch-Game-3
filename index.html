@@ -4,26 +4,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jeu de Grattage Délices</title>
+    <title>Jeu de Grattage Délices - Edition Royale</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
       body {
         font-family: 'Montserrat', sans-serif;
-        background-color: #052e16; /* Deep green for safety while Tailwind loads */
+        background-color: #064e3b; /* Vert Émeraude Profond */
+        margin: 0;
+        padding: 0;
       }
       .font-playfair {
         font-family: 'Playfair Display', serif;
       }
-      .casino-gradient {
-        background: radial-gradient(circle at center, #065f46 0%, #064e3b 100%);
+      /* Fond inspiré des éditions "CASH" et "MILLIONNAIRE" */
+      .scratch-bg {
+        background: radial-gradient(circle at 50% 50%, #059669 0%, #065f46 50%, #064e3b 100%);
+        position: relative;
+        overflow-x: hidden;
       }
-      .gold-border {
-        border: 4px solid #facc15;
-        box-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+      /* Effet de motif guilloché classique des billets de banque/tickets */
+      .pattern-overlay {
+        position: fixed;
+        inset: 0;
+        background-image: radial-gradient(#ffffff08 1px, transparent 1px);
+        background-size: 20px 20px;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .sunburst-overlay {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 200vmax;
+        height: 200vmax;
+        background: repeating-conic-gradient(
+          from 0deg,
+          rgba(251, 191, 36, 0.03) 0deg 5deg,
+          transparent 5deg 10deg
+        );
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 0;
+      }
+      .royal-border {
+        border: 4px solid #fcd34d;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(251, 191, 36, 0.3);
       }
       .scratch-canvas {
-        cursor: crosshair;
+        cursor: url('https://cur.cursors-4u.net/money/mon-4/mon341.cur'), crosshair;
         touch-action: none;
       }
     </style>

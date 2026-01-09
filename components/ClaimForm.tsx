@@ -25,7 +25,7 @@ export const ClaimForm: React.FC<ClaimFormProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div id="claim-form" className="w-full max-w-5xl mx-auto mt-12 p-6 md:p-12 bg-white rounded-xl shadow-2xl text-gray-800">
+    <div id="claim-form" className="w-full p-6 md:p-12 bg-white rounded-xl text-gray-800">
       {/* Participation Number Header */}
       <div className="text-center mb-10 pb-8 border-b border-gray-100">
         <p className="text-gray-400 font-bold uppercase tracking-widest text-xs mb-4">Votre numéro de participation exclusif</p>
@@ -125,7 +125,6 @@ export const ClaimForm: React.FC<ClaimFormProps> = ({ onSuccess }) => {
             </div>
           </div>
           
-          {/* Mandatory info label */}
           <div className="flex items-end justify-end pb-2">
             <p className="text-xs text-gray-500"><span className="text-red-600 font-bold">*</span> champs obligatoires</p>
           </div>
@@ -151,7 +150,7 @@ export const ClaimForm: React.FC<ClaimFormProps> = ({ onSuccess }) => {
           <button
             disabled={loading}
             type="submit"
-            className="w-full max-w-xl py-4 bg-[#d10000] hover:bg-[#b00000] text-white text-lg md:text-xl font-bold rounded-lg shadow-lg transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed uppercase tracking-wide"
+            className="w-full py-4 bg-[#d10000] hover:bg-[#b00000] text-white text-lg md:text-xl font-bold rounded-lg shadow-lg transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed uppercase tracking-wide"
           >
             {loading ? 'Validation en cours...' : 'Je valide mon numéro de participation !'}
           </button>
